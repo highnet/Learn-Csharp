@@ -43,10 +43,14 @@ namespace Singly_Linked_List
 
         public void RemoveLast()
         {
-            if (this.Count() <= 2)
+            if (this.Count() == 1)
             {
-                RemoveFirst();
-                return;
+                    Clear();
+                    return;
+            } else if (this.Count() == 2)
+            }
+                    head.next = null;
+                    return;
             }
             GenericNode scannerNode = head;
 
