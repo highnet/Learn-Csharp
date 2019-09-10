@@ -22,9 +22,10 @@ namespace Undirected_Graph
                     b = node;
                 }
             }
-            if (a != null && b != null)
+            if (a != null && b != null && id_a != id_b)
             {
                 a.edges.Add(b);
+                b.edges.Add(a);
             }
         }
 
