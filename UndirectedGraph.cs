@@ -36,7 +36,6 @@ namespace Undirected_Graph
 
         public void Add(int _id, int _value)
         {
-            Console.WriteLine("Adding node");
             nodes.Add(new Node(_id, _value));
         }
 
