@@ -26,7 +26,6 @@ namespace Undirected_Graph
             {
                 a.edges.Add(b);
             }
-            Console.WriteLine(a.edges.Count);
         }
 
         public int Count()
