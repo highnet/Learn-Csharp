@@ -22,16 +22,67 @@ namespace Undirected_Graph
                     b = node;
                 }
             }
-            if (a != null && b != null && id_a != id_b)
+            if (a != null && b != null && id_a != id_b && !AreConnected(id_a, id_b))
             {
                 a.edges.Add(b);
                 b.edges.Add(a);
             }
         }
 
-        public int Count()
+        public bool AreConnected(int id_a, int id_b)
+        {
+            Node a = null;
+            Node b = null;
+            foreach (Node node in this.nodes)
+            {
+                if (a != null && b != null)
+                {
+                    break;
+                }
+
+                if (node.id == id_a)
+                {
+                    a = node;
+                }
+
+                if (node.id == id_b)
+                {
+                    b = node;
+                }
+            }
+
+            return a != null && b != null && id_a != id_b && a.edges.Contains(b) && b.edges.Contains(a);
+        }
+
+        public int Order() // number of vertices in the graph
         {
             return nodes.Count;
+        }
+
+        public int Weight(int id) // number of edges coming to-and-from the node id
+        {
+            Node n = null;
+
+            foreach(Node node in this.nodes)
+            {
+                if (node.id == id)
+                {
+                    n = node;
+                    break;
+                }
+            }
+            return n.edges.Count;
+
+        }
+
+        public int Size() // number of edges in the graph
+        {
+            int doubledSum = 0; 
+            foreach (Node node in this.nodes)
+            {
+                    doubledSum += node.edges.Count;
+            }
+            return doubledSum / 2;
         }
 
         public void Add(int _id, int _value)
@@ -46,7 +97,7 @@ namespace Undirected_Graph
             {
 
                 str += "[id: " + node.id + " value: " + node.value + " edges: { ";
-                foreach(Node edge in node.edges)
+                foreach (Node edge in node.edges)
                 {
                     if (edge != null)
                     {
