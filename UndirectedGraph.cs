@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace Undirected_Graph
+namespace Tree
 {
-    public class UndirectedGraph
+    public class Tree
     {
         public List<Node> nodes = new List<Node>();
 
