@@ -20,13 +20,18 @@ public class Bird : MonoBehaviour
     public bool doCohesion = true;
     public bool doSeparation = true;
     public List<Bird> neighborsCohesion;
+    public List<Bird> neighborsSeparation;
     public GameObject worldController;
     public NeighborLines neighborLines;
+    public NeighborRadius neighborRadius;
+    public Vector3 centreOfMassSeparation;
+    public Vector3 centreOfMassCohesion;
 
     private void Awake()
     {
         worldController = GameObject.FindGameObjectsWithTag("World Controller")[0];
         neighborLines = worldController.GetComponent<NeighborLines>();
+        neighborRadius = worldController.GetComponent<NeighborRadius>();
     }
 
     private void Start()
@@ -44,11 +49,22 @@ public class Bird : MonoBehaviour
 
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, cohesionRadius);
         neighborsCohesion = new List<Bird>();
-        foreach(Collider hit in hitColliders)
+
+        foreach (Collider hit in hitColliders)
         {
             if (hit.gameObject.tag.Contains("bird"))
             {
                 neighborsCohesion.Add(hit.gameObject.GetComponent<Bird>());
+            }
+        }
+
+        hitColliders = Physics.OverlapSphere(transform.position, separationRadius);
+        neighborsSeparation = new List<Bird>();
+        foreach (Collider hit in hitColliders)
+        {
+            if (hit.gameObject.tag.Contains("bird"))
+            {
+                neighborsSeparation.Add(hit.gameObject.GetComponent<Bird>());
             }
         }
 
@@ -85,25 +101,23 @@ public class Bird : MonoBehaviour
     private void Separation()
     {
         int neighbourCount = 0;
-        Vector3 centreOfMass;
-        centreOfMass = new Vector3();
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, separationRadius);
+        centreOfMassSeparation = new Vector3();
         int i = 0;
-        while (i < hitColliders.Length)
+        while (i < neighborsSeparation.Count)
         {
-            if (hitColliders[i].gameObject != this.gameObject && hitColliders[i].tag == "bird")
+            if (neighborsSeparation[i].gameObject != this.gameObject && neighborsSeparation[i].tag == "bird")
             {
-                centreOfMass += hitColliders[i].GetComponent<Bird>().transform.position;
+                centreOfMassSeparation += neighborsSeparation[i].GetComponent<Bird>().transform.position;
                 neighbourCount++;
             }
 
 
             if (neighbourCount != 0 )
             {
-                centreOfMass /= neighbourCount;
-                if (Vector3.Distance(transform.position, centreOfMass) < separationRadius)
+                centreOfMassSeparation /= neighbourCount;
+                if (Vector3.Distance(transform.position, centreOfMassSeparation) < separationRadius)
                 {
-                    desiredHeading = -(centreOfMass - transform.position).normalized;
+                    desiredHeading = -(centreOfMassSeparation - transform.position).normalized;
                 }
 
             }
@@ -116,28 +130,27 @@ public class Bird : MonoBehaviour
     {
         Debug.Log("ouch");
         neighborLines.selectedBird = this;
+        neighborRadius.selectedBird = this;
     }
 
     private void Cohesion()
     {
         int neighbourCount = 0;
-        Vector3 centreOfMass;
-        centreOfMass = new Vector3();
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, cohesionRadius);
+        centreOfMassCohesion = new Vector3();
         int i = 0;
-        while (i < hitColliders.Length)
+        while (i < neighborsCohesion.Count)
         {
-            if (hitColliders[i].gameObject != this.gameObject && hitColliders[i].tag == "bird")
+            if (neighborsCohesion[i].gameObject != this.gameObject && neighborsCohesion[i].tag == "bird")
             {
-                centreOfMass += hitColliders[i].GetComponent<Bird>().transform.position;
+                centreOfMassCohesion += neighborsCohesion[i].GetComponent<Bird>().transform.position;
                 neighbourCount++;
             }
 
 
             if (neighbourCount != 0)
             {
-                centreOfMass /= neighbourCount;
-                desiredHeading = (centreOfMass - transform.position).normalized;
+                centreOfMassCohesion /= neighbourCount;
+                desiredHeading = (centreOfMassCohesion - transform.position).normalized;
             }
 
             i++;

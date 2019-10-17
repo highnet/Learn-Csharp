@@ -7,34 +7,64 @@ public class NeighborLines : MonoBehaviour
 
     public Bird selectedBird;
     public List<Bird> selectedBirdNeighborsCohesion;
-    public LineRenderer lineRenderer;
+    public List<Bird> selectedBirdNeighborsSeparation;
+    public GameObject cohesionLinePrefab;
+    public GameObject separationLinePrefab;
+    public List<GameObject> cohesionLines;
+    public List<GameObject> separationLines;
     // Start is called before the first frame update
     void Start()
     {
-        lineRenderer = GetComponent<LineRenderer>();
+        cohesionLines = new List<GameObject>();
+        for(int i = 0; i < 40; i++)
+        {
+            cohesionLines.Add(GameObject.Instantiate(cohesionLinePrefab));
+            separationLines.Add(GameObject.Instantiate(separationLinePrefab));
+        }
+    }
+    // Update is called once per frame
+
+    public void ResetLines()
+    {
+        foreach(GameObject lineGO in cohesionLines)
+        {
+            lineGO.GetComponent<LineRenderer>().SetPositions(new Vector3[] { Vector3.zero, Vector3.zero });
+        }
+        foreach (GameObject lineGO in separationLines)
+        {
+            lineGO.GetComponent<LineRenderer>().SetPositions(new Vector3[] { Vector3.zero, Vector3.zero });
+        }
     }
 
-
-    // Update is called once per frame
-    void Update()
+    private void DrawLines()
     {
-        if (selectedBird != null )
+        if (selectedBird != null)
         {
             selectedBirdNeighborsCohesion = selectedBird.neighborsCohesion;
-            Vector3[] positions = new Vector3[selectedBirdNeighborsCohesion.Count + 1];
-
             if (selectedBirdNeighborsCohesion.Count > 0)
             {
-                lineRenderer.positionCount = 1 + selectedBirdNeighborsCohesion.Count;
-                positions[0] = selectedBird.transform.position;
-                for (int i = 1; i < positions.Length; i++)
+                for (int i = 0; i < selectedBirdNeighborsCohesion.Count; i++)
                 {
-                    positions[i] = selectedBirdNeighborsCohesion[i - 1].transform.position;
+                    cohesionLines[i].GetComponent<LineRenderer>().SetPositions(new Vector3[] { selectedBird.transform.position, selectedBirdNeighborsCohesion[i].transform.position });
                 }
+            }
 
-                lineRenderer.SetPositions(positions);
+            selectedBirdNeighborsSeparation = selectedBird.neighborsSeparation;
+            if (selectedBirdNeighborsSeparation.Count > 0)
+            {
+                for (int i = 0; i < selectedBirdNeighborsSeparation.Count; i++)
+                {
+                    separationLines[i].GetComponent<LineRenderer>().SetPositions(new Vector3[] { selectedBird.transform.position, selectedBirdNeighborsSeparation[i].transform.position });
+                }
             }
 
         }
+    }
+    void Update()
+    {
+        ResetLines();
+        DrawLines();
+
+
     }
 }
