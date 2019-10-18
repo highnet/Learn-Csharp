@@ -1,243 +1,94 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bird : MonoBehaviour
+public class NeighborRadius : MonoBehaviour
 {
-
-    public Vector3 moveDirection;
-    public Vector3 desiredHeading;
-    public float moveSpeed;
-    [Range(0.1F, 10.0F)]
-    public float alignmentRadius;
-    [Range(0.1F, 10.0F)]
-    public float cohesionRadius;
-    [Range(0.1F, 10.0F)]
-    public float separationRadius;
-    public float turnSpeed;
-    public bool doRandomizeSpeed = false;
-    public bool doAlignment = true;
-    public bool doCohesion = true;
-    public bool doSeparation = true;
-    public List<Bird> neighborsCohesion;
-    public List<Bird> neighborsSeparation;
-    public GameObject worldController;
-    public NeighborLines neighborLines;
-    public NeighborRadius neighborRadius;
-    public Vector3 centreOfMassSeparation;
-    public Vector3 centreOfMassCohesion;
-    public Vector3 alignmentCentreOfMass;
-
-    private void Awake()
+    public Bird selectedBird;
+    public GameObject cohesionCircle;
+    public GameObject cohesionDot;
+    public GameObject separationDot;
+    public GameObject separationCircle;
+    public GameObject alignmentDot;
+    public GameObject alignmentCircle;
+    private Vector3 offScreen = new Vector3(100, 100, 100);
+    public GameObject desiredHeadingDot;
+    // Start is called before the first frame update
+    void Start()
     {
-        worldController = GameObject.FindGameObjectsWithTag("World Controller")[0];
-        neighborLines = worldController.GetComponent<NeighborLines>();
-        neighborRadius = worldController.GetComponent<NeighborRadius>();
+        
     }
 
-    private void Start()
+    // Update is called once per frame
+    void Update()
     {
-        desiredHeading = GetComponent<Transform>().up.normalized;
-        moveDirection = desiredHeading;
-        StartCoroutine("SteerToHeading");
-        StartCoroutine("RandomizeSpeed");
-        desiredHeading = new Vector3(0, -1, 0);
-    }
-
-    private void FixedUpdate()
-    {
-        transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.World); // move
-
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, cohesionRadius);
-        neighborsCohesion = new List<Bird>();
-
-        foreach (Collider hit in hitColliders)
+        if (selectedBird != null)
         {
-            if (hit.gameObject.tag.Contains("bird"))
+            Vector3 birdPosition = selectedBird.transform.position;
+
+            desiredHeadingDot.transform.position = selectedBird.desiredHeading + selectedBird.transform.position;
+
+            if (selectedBird.doCohesion)
             {
-                neighborsCohesion.Add(hit.gameObject.GetComponent<Bird>());
+                cohesionCircle.transform.position = birdPosition;
+                cohesionCircle.transform.localScale = new Vector3(0.5f * selectedBird.cohesionRadius, 0.5f * selectedBird.cohesionRadius, 1);
+            } else
+            {
+                cohesionCircle.transform.position = offScreen;
             }
-        }
 
-        hitColliders = Physics.OverlapSphere(transform.position, separationRadius);
-        neighborsSeparation = new List<Bird>();
-        foreach (Collider hit in hitColliders)
-        {
-            if (hit.gameObject.tag.Contains("bird"))
+            if (selectedBird.doSeparation)
             {
-                neighborsSeparation.Add(hit.gameObject.GetComponent<Bird>());
+                separationCircle.transform.position = birdPosition;
+                separationCircle.transform.localScale = new Vector3(0.5f * selectedBird.separationRadius, 0.5f * selectedBird.separationRadius, 1);
             }
-        }
-
-    }
-
-    private void LateUpdate()
-    {
-        transform.up = ((transform.position + moveDirection) - transform.position);
-
-        if (doCohesion)
-        {
-            Cohesion();
-        }
-        if (doAlignment)
-        {
-            Alignment();
-        }
-        if (doSeparation)
-        {
-            Separation();
-        }
-    }
-
-    private void OnCollisionStay(Collision collision)
-    {
-
-        if (collision.gameObject.tag.Contains("wall"))
-        {
-
-            BounceFromWall();
-        }
-    }
-
-    private void Separation()
-    {
-        int neighbourCount = 0;
-        centreOfMassSeparation = new Vector3();
-        int i = 0;
-        while (i < neighborsSeparation.Count)
-        {
-            if (neighborsSeparation[i].gameObject != this.gameObject && neighborsSeparation[i].tag == "bird")
+            else
             {
-                centreOfMassSeparation += neighborsSeparation[i].GetComponent<Bird>().transform.position;
-                neighbourCount++;
+                separationCircle.transform.position = offScreen;
+            }
+
+            if (selectedBird.doAlignment)
+            {
+                alignmentCircle.transform.position = birdPosition;
+                alignmentCircle.transform.localScale = new Vector3(0.5f * selectedBird.alignmentRadius, 0.5f * selectedBird.alignmentRadius, 1);
+            }
+            else
+            {
+                alignmentCircle.transform.position = offScreen;
+            }
+
+            if (selectedBird.doCohesion && selectedBird.centreOfMassCohesion != Vector3.zero)
+            {
+                cohesionDot.transform.position = selectedBird.centreOfMassCohesion;
+            } else
+            {
+                cohesionDot.transform.position = offScreen;
+            }
+            if (selectedBird.doSeparation && selectedBird.centreOfMassSeparation != Vector3.zero)
+            {
+                separationDot.transform.position = selectedBird.centreOfMassSeparation;
+            } else
+            {
+                separationDot.transform.position = offScreen;
+            }
+            if (selectedBird.doAlignment && selectedBird.alignmentCentreOfMass != Vector3.zero)
+            {
+                alignmentDot.transform.position = selectedBird.alignmentCentreOfMass + selectedBird.transform.position;
+            }
+            else
+            {
+                alignmentDot.transform.position = offScreen;
             }
 
 
-            if (neighbourCount != 0 )
-            {
-                centreOfMassSeparation /= neighbourCount;
-                if (Vector3.Distance(transform.position, centreOfMassSeparation) < separationRadius)
-                {
-                    desiredHeading = -(centreOfMassSeparation - transform.position).normalized;
-                }
-
-            }
-
-            i++;
-        }
-    }
-
-    private void OnMouseDown()
-    {
-        Debug.Log("ouch");
-        neighborLines.selectedBird = this;
-        neighborRadius.selectedBird = this;
-    }
-
-    private void Cohesion()
-    {
-        int neighbourCount = 0;
-        centreOfMassCohesion = new Vector3();
-        int i = 0;
-        while (i < neighborsCohesion.Count)
+        } else
         {
-            if (neighborsCohesion[i].gameObject != this.gameObject && neighborsCohesion[i].tag == "bird")
-            {
-                centreOfMassCohesion += neighborsCohesion[i].GetComponent<Bird>().transform.position;
-                neighbourCount++;
-            }
-
-
-            if (neighbourCount != 0)
-            {
-                centreOfMassCohesion /= neighbourCount;
-                desiredHeading = (centreOfMassCohesion - transform.position).normalized;
-            }
-
-            i++;
-        }
-    }
-
-    private void Alignment()
-    {
-        int neighbourCount = 0;
-        alignmentCentreOfMass = new Vector3();
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, alignmentRadius);
-        int i = 0;
-        while (i < hitColliders.Length)
-        {
-            if (hitColliders[i].gameObject != this.gameObject && hitColliders[i].tag == "bird")
-            {
-                alignmentCentreOfMass += hitColliders[i].GetComponent<Bird>().moveDirection;
-                neighbourCount++;
-            }
-
-
-            if (neighbourCount != 0)
-            {
-                alignmentCentreOfMass /= neighbourCount;
-                desiredHeading = alignmentCentreOfMass.normalized;
-            }
-
-            i++;
-        }
-
-
-    }
-
-    private void BounceFromWall()
-    {
-        RaycastHit hit;
-        Ray ray = new Ray(transform.position, transform.up);
-
-        if (Physics.Raycast(ray, out hit))
-        {
-            Debug.Log(hit.collider.gameObject.name);
-            switch (hit.collider.gameObject.name)
-            {
-                case "Wall Vertical Right":
-                    moveDirection.x = -1;
-                    break;
-                case "Wall Horizontal Up":
-                    moveDirection.y = -1;
-                    Debug.Log("TEST");
-                    break;
-                case "Wall Vertical Left":
-                    moveDirection.x = 1;
-                    break;
-                case "Wall Horizontal Down":
-                    moveDirection.y = 1;
-                    break;
-                default:
-
-                    break;
-            }
-            desiredHeading = moveDirection;
-        }
-    }
-
-
-    IEnumerator RandomizeSpeed()
-    {
-        for (; ; )
-        {
-            if (doRandomizeSpeed)
-            {
-                moveSpeed += Random.Range(-0.01f, 0.01f);
-            }
-            yield return new WaitForSeconds(.01f);
-        }
-
-    }
-
-    IEnumerator SteerToHeading()
-    {
-        for (; ; )
-        {
-            moveDirection = Vector3.RotateTowards(moveDirection, desiredHeading, turnSpeed * Time.deltaTime, 0f);
-            moveDirection.z = 0;
-            moveDirection.Normalize();
-            yield return new WaitForSeconds(.01f);
+            cohesionCircle.transform.position = offScreen;
+            separationCircle.transform.position = offScreen;
+            cohesionDot.transform.position = offScreen;
+            separationDot.transform.position = offScreen;
+            alignmentCircle.transform.position = offScreen;
+            alignmentDot.transform.position = offScreen;
         }
     }
 }
