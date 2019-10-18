@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -26,7 +26,7 @@ public class NeighborRadius : MonoBehaviour
         {
             Vector3 birdPosition = selectedBird.transform.position;
 
-            desiredHeadingDot.transform.position = selectedBird.desiredHeading;
+            desiredHeadingDot.transform.position = selectedBird.desiredHeading + selectedBird.transform.position;
 
             if (selectedBird.doCohesion)
             {
@@ -73,7 +73,7 @@ public class NeighborRadius : MonoBehaviour
             }
             if (selectedBird.doAlignment && selectedBird.alignmentCentreOfMass != Vector3.zero)
             {
-                alignmentDot.transform.position = selectedBird.alignmentCentreOfMass;
+                alignmentDot.transform.position = selectedBird.alignmentCentreOfMass + selectedBird.transform.position;
             }
             else
             {
