@@ -40,6 +40,10 @@ public class NeighborLines : MonoBehaviour
     {
         if (selectedBird != null)
         {
+            if (selectedBird.doCohesion)
+            {
+
+
             selectedBirdNeighborsCohesion = selectedBird.neighborsCohesion;
             if (selectedBirdNeighborsCohesion.Count > 0)
             {
@@ -48,6 +52,10 @@ public class NeighborLines : MonoBehaviour
                     cohesionLines[i].GetComponent<LineRenderer>().SetPositions(new Vector3[] { selectedBird.transform.position, selectedBirdNeighborsCohesion[i].transform.position });
                 }
             }
+            }
+
+            if (selectedBird.doSeparation)
+            {
 
             selectedBirdNeighborsSeparation = selectedBird.neighborsSeparation;
             if (selectedBirdNeighborsSeparation.Count > 0)
@@ -57,6 +65,8 @@ public class NeighborLines : MonoBehaviour
                     separationLines[i].GetComponent<LineRenderer>().SetPositions(new Vector3[] { selectedBird.transform.position, selectedBirdNeighborsSeparation[i].transform.position });
                 }
             }
+            }
+
 
         }
     }

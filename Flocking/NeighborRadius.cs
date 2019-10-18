@@ -9,6 +9,10 @@ public class NeighborRadius : MonoBehaviour
     public GameObject cohesionDot;
     public GameObject separationDot;
     public GameObject separationCircle;
+    public GameObject alignmentDot;
+    public GameObject alignmentCircle;
+    private Vector3 offScreen = new Vector3(100, 100, 100);
+    public GameObject desiredHeadingDot;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,19 +24,71 @@ public class NeighborRadius : MonoBehaviour
     {
         if (selectedBird != null)
         {
-        Vector3 birdPosition = selectedBird.transform.position;
-        cohesionCircle.transform.position = birdPosition;
-        separationCircle.transform.position = birdPosition;
-        cohesionCircle.transform.localScale = new Vector3(0.5f * selectedBird.cohesionRadius,0.5f *selectedBird.cohesionRadius,1);
-        separationCircle.transform.localScale = new Vector3(0.5f * selectedBird.separationRadius, 0.5f * selectedBird.separationRadius, 1);
-        cohesionDot.transform.position = selectedBird.centreOfMassCohesion;
-        separationDot.transform.position = selectedBird.centreOfMassSeparation;
+            Vector3 birdPosition = selectedBird.transform.position;
+
+            desiredHeadingDot.transform.position = selectedBird.desiredHeading;
+
+            if (selectedBird.doCohesion)
+            {
+                cohesionCircle.transform.position = birdPosition;
+                cohesionCircle.transform.localScale = new Vector3(0.5f * selectedBird.cohesionRadius, 0.5f * selectedBird.cohesionRadius, 1);
+            } else
+            {
+                cohesionCircle.transform.position = offScreen;
+            }
+
+            if (selectedBird.doSeparation)
+            {
+                separationCircle.transform.position = birdPosition;
+                separationCircle.transform.localScale = new Vector3(0.5f * selectedBird.separationRadius, 0.5f * selectedBird.separationRadius, 1);
+            }
+            else
+            {
+                separationCircle.transform.position = offScreen;
+            }
+
+            if (selectedBird.doAlignment)
+            {
+                alignmentCircle.transform.position = birdPosition;
+                alignmentCircle.transform.localScale = new Vector3(0.5f * selectedBird.alignmentRadius, 0.5f * selectedBird.alignmentRadius, 1);
+            }
+            else
+            {
+                alignmentCircle.transform.position = offScreen;
+            }
+
+            if (selectedBird.doCohesion && selectedBird.centreOfMassCohesion != Vector3.zero)
+            {
+                cohesionDot.transform.position = selectedBird.centreOfMassCohesion;
+            } else
+            {
+                cohesionDot.transform.position = offScreen;
+            }
+            if (selectedBird.doSeparation && selectedBird.centreOfMassSeparation != Vector3.zero)
+            {
+                separationDot.transform.position = selectedBird.centreOfMassSeparation;
+            } else
+            {
+                separationDot.transform.position = offScreen;
+            }
+            if (selectedBird.doAlignment && selectedBird.alignmentCentreOfMass != Vector3.zero)
+            {
+                alignmentDot.transform.position = selectedBird.alignmentCentreOfMass;
+            }
+            else
+            {
+                alignmentDot.transform.position = offScreen;
+            }
+
+
         } else
         {
-            cohesionCircle.transform.position = new Vector3(100, 100, 100);
-            separationCircle.transform.position = new Vector3(100, 100, 100);
-            cohesionDot.transform.position = new Vector3(100, 100, 100);
-            separationDot.transform.position = new Vector3(100, 100, 100);
+            cohesionCircle.transform.position = offScreen;
+            separationCircle.transform.position = offScreen;
+            cohesionDot.transform.position = offScreen;
+            separationDot.transform.position = offScreen;
+            alignmentCircle.transform.position = offScreen;
+            alignmentDot.transform.position = offScreen;
         }
     }
 }

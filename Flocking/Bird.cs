@@ -26,6 +26,7 @@ public class Bird : MonoBehaviour
     public NeighborRadius neighborRadius;
     public Vector3 centreOfMassSeparation;
     public Vector3 centreOfMassCohesion;
+    public Vector3 alignmentCentreOfMass;
 
     private void Awake()
     {
@@ -160,23 +161,22 @@ public class Bird : MonoBehaviour
     private void Alignment()
     {
         int neighbourCount = 0;
-        Vector3 nextMoveDirection;
-        nextMoveDirection = new Vector3();
+        alignmentCentreOfMass = new Vector3();
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, alignmentRadius);
         int i = 0;
         while (i < hitColliders.Length)
         {
             if (hitColliders[i].gameObject != this.gameObject && hitColliders[i].tag == "bird")
             {
-                nextMoveDirection = nextMoveDirection + hitColliders[i].GetComponent<Bird>().moveDirection;
+                alignmentCentreOfMass += hitColliders[i].GetComponent<Bird>().moveDirection;
                 neighbourCount++;
             }
 
 
             if (neighbourCount != 0)
             {
-                nextMoveDirection /= neighbourCount;
-                desiredHeading = nextMoveDirection.normalized;
+                alignmentCentreOfMass /= neighbourCount;
+                desiredHeading = alignmentCentreOfMass.normalized;
             }
 
             i++;
